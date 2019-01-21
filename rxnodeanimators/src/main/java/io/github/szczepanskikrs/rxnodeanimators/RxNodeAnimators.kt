@@ -16,6 +16,18 @@ import io.reactivex.CompletableEmitter
 import java.util.concurrent.atomic.AtomicInteger
 
 object RxNodeAnimators {
+    /**
+     * Performs rotation animation on given nodes.
+     *
+     * @param quaternion represents quaternion that will be applied during animation.
+     * @param duration time for animation to finish in milliseconds.
+     * @param interpolator android interpolator that will be used for animating for more info check
+     * https://robots.thoughtbot.com/android-interpolators-a-visual-guide for more info.
+     * @param nodes list of nodes that animation will be applied to.
+     *
+     * @return Completable to be subscribed to. If you want to start multiple transformations at once use
+     * Completable.mergeArray(). If you wish to perform animations in a sequence use Completable.andThen().
+     */
     fun animateNodeRotation(
         quaternion: Quaternion,
         duration: Long = 1000,
@@ -42,6 +54,18 @@ object RxNodeAnimators {
         }
     }
 
+    /**
+     * Performs movement animation on given nodes.
+     *
+     * @param vector represents vector that will be applied during animation.
+     * @param duration time for animation to finish in milliseconds.
+     * @param interpolator android interpolator that will be used for animating for more info check
+     * https://robots.thoughtbot.com/android-interpolators-a-visual-guide for more info.
+     * @param nodes list of nodes that animation will be applied to.
+     *
+     * @return Completable to be subscribed to. If you want to start multiple transformations at once use
+     * Completable.mergeArray(). If you wish to perform animations in a sequence use Completable.andThen().
+     */
     fun animateNodeMovement(
         vector: Vector3,
         duration: Long = 1000,
@@ -68,6 +92,18 @@ object RxNodeAnimators {
         }
     }
 
+    /**
+     * Performs scale animation on given nodes.
+     *
+     * @param vector represents vector that will be applied during animation.
+     * @param duration time for animation to finish in milliseconds.
+     * @param interpolator android interpolator that will be used for animating for more info check
+     * https://robots.thoughtbot.com/android-interpolators-a-visual-guide for more info.
+     * @param nodes list of nodes that animation will be applied to.
+     *
+     * @return Completable to be subscribed to. If you want to start multiple transformations at once use
+     * Completable.mergeArray(). If you wish to perform animations in a sequence use Completable.andThen().
+     */
     fun animateNodeScale(
         vector: Vector3,
         duration: Long = 1000,
@@ -130,5 +166,4 @@ object RxNodeAnimators {
     private const val LOC_SCALE = "localScale"
     private const val LOC_POSITION = "localPosition"
     private const val LOC_ROTATION = "localRotation"
-
 }
