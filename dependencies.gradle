@@ -1,0 +1,14 @@
+ext.versions = [
+        arCore                  : '1.6.0',
+        rxJava2                 : '2.2.5',
+        appCompatAndroidx       : '1.0.2',
+        constraintLayoutAndroidx: '1.1.3'
+]
+
+ext.libraries = [
+        appCompat       : "androidx.appcompat:appcompat:$versions.appCompatAndroidx",
+        arCore          : "com.google.ar.sceneform.ux:sceneform-ux:$versions.arCore",
+        constraintLayout: "androidx.constraintlayout:constraintlayout:$versions.constraintLayoutAndroidx",
+        rxJava2         : "io.reactivex.rxjava2:rxjava:$versions.rxJava2",
+        sceneform       : "com.google.ar.sceneform:core:$versions.arCore"
+]
