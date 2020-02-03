@@ -404,3 +404,153 @@ sceneform.asset('sampledata/models/kw70.obj',
         'default',
         'sampledata/models/kw70.sfa',
         'src/main/res/raw/kw70')
+
+sceneform.asset('sampledata/models/kw71.obj',
+        'default',
+        'sampledata/models/kw71.sfa',
+        'src/main/res/raw/kw71')
+
+sceneform.asset('sampledata/models/kw72.obj',
+        'default',
+        'sampledata/models/kw72.sfa',
+        'src/main/res/raw/kw72')
+
+sceneform.asset('sampledata/models/kw73.obj',
+        'default',
+        'sampledata/models/kw73.sfa',
+        'src/main/res/raw/kw73')
+
+sceneform.asset('sampledata/models/kw74.obj',
+        'default',
+        'sampledata/models/kw74.sfa',
+        'src/main/res/raw/kw74')
+
+sceneform.asset('sampledata/models/kw75.obj',
+        'default',
+        'sampledata/models/kw75.sfa',
+        'src/main/res/raw/kw75')
+
+sceneform.asset('sampledata/models/kw76.obj',
+        'default',
+        'sampledata/models/kw76.sfa',
+        'src/main/res/raw/kw76')
+
+sceneform.asset('sampledata/models/kw77.obj',
+        'default',
+        'sampledata/models/kw77.sfa',
+        'src/main/res/raw/kw77')
+
+sceneform.asset('sampledata/models/kw78.obj',
+        'default',
+        'sampledata/models/kw78.sfa',
+        'src/main/res/raw/kw78')
+
+sceneform.asset('sampledata/models/kw79.obj',
+        'default',
+        'sampledata/models/kw79.sfa',
+        'src/main/res/raw/kw79')
+
+sceneform.asset('sampledata/models/kw80.obj',
+        'default',
+        'sampledata/models/kw80.sfa',
+        'src/main/res/raw/kw80')
+
+sceneform.asset('sampledata/models/kw81.obj',
+        'default',
+        'sampledata/models/kw81.sfa',
+        'src/main/res/raw/kw81')
+
+sceneform.asset('sampledata/models/kw82.obj',
+        'default',
+        'sampledata/models/kw82.sfa',
+        'src/main/res/raw/kw82')
+
+sceneform.asset('sampledata/models/kw83.obj',
+        'default',
+        'sampledata/models/kw83.sfa',
+        'src/main/res/raw/kw83')
+
+sceneform.asset('sampledata/models/kw84.obj',
+        'default',
+        'sampledata/models/kw84.sfa',
+        'src/main/res/raw/kw84')
+
+sceneform.asset('sampledata/models/kw85.obj',
+        'default',
+        'sampledata/models/kw85.sfa',
+        'src/main/res/raw/kw85')
+
+sceneform.asset('sampledata/models/kw86.obj',
+        'default',
+        'sampledata/models/kw86.sfa',
+        'src/main/res/raw/kw86')
+
+sceneform.asset('sampledata/models/kw87.obj',
+        'default',
+        'sampledata/models/kw87.sfa',
+        'src/main/res/raw/kw87')
+
+sceneform.asset('sampledata/models/kw88.obj',
+        'default',
+        'sampledata/models/kw88.sfa',
+        'src/main/res/raw/kw88')
+
+sceneform.asset('sampledata/models/kw89.obj',
+        'default',
+        'sampledata/models/kw89.sfa',
+        'src/main/res/raw/kw89')
+
+sceneform.asset('sampledata/models/kw90.obj',
+        'default',
+        'sampledata/models/kw90.sfa',
+        'src/main/res/raw/kw90')
+
+sceneform.asset('sampledata/models/kw91.obj',
+        'default',
+        'sampledata/models/kw91.sfa',
+        'src/main/res/raw/kw91')
+
+sceneform.asset('sampledata/models/kw92.obj',
+        'default',
+        'sampledata/models/kw92.sfa',
+        'src/main/res/raw/kw92')
+
+sceneform.asset('sampledata/models/kw93.obj',
+        'default',
+        'sampledata/models/kw93.sfa',
+        'src/main/res/raw/kw93')
+
+sceneform.asset('sampledata/models/kw94.obj',
+        'default',
+        'sampledata/models/kw94.sfa',
+        'src/main/res/raw/kw94')
+
+sceneform.asset('sampledata/models/kw95.obj',
+        'default',
+        'sampledata/models/kw95.sfa',
+        'src/main/res/raw/kw95')
+
+sceneform.asset('sampledata/models/kw96.obj',
+        'default',
+        'sampledata/models/kw96.sfa',
+        'src/main/res/raw/kw96')
+
+sceneform.asset('sampledata/models/kw97.obj',
+        'default',
+        'sampledata/models/kw97.sfa',
+        'src/main/res/raw/kw97')
+
+sceneform.asset('sampledata/models/kw98.obj',
+        'default',
+        'sampledata/models/kw98.sfa',
+        'src/main/res/raw/kw98')
+
+sceneform.asset('sampledata/models/kw99.obj',
+        'default',
+        'sampledata/models/kw99.sfa',
+        'src/main/res/raw/kw99')
+
+sceneform.asset('sampledata/models/kw100.obj',
+        'default',
+        'sampledata/models/kw100.sfa',
+        'src/main/res/raw/kw100')

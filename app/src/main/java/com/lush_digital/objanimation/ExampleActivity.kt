@@ -7,6 +7,7 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
 import com.google.ar.core.Anchor
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.SkeletonNode
@@ -30,6 +31,8 @@ class ExampleActivity : AppCompatActivity() {
     val delayTime = 100L
     var frameNumber: Int = 1
     var uniqueId: Int = 1
+
+    var i = 0
 
     private var modelLoader: ModelLoader? = null
 
@@ -73,7 +76,7 @@ class ExampleActivity : AppCompatActivity() {
 
     private fun allRawFiles(): ArrayList<Int> {
 
-        for (i in 1 until 70) {
+        for (i in 1 until 100) {
 
             id.add(resources.getIdentifier("kw$i", "raw", packageName))
 
@@ -84,29 +87,25 @@ class ExampleActivity : AppCompatActivity() {
 
     private fun loadModels(id: ArrayList<Int>) {
 
-        // When you build a Renderable, Sceneform loads its resources in the background while returning
-        // a CompletableFuture. Call thenAccept(), handle(), or check isDone() before calling get().
-
-        for (i in id.indices) {
-
         val handler = Handler()
         handler.postDelayed({
-            // Actions to do after 1 seconds
+
             val myUniqueID = getMyUniqueId()
             modelLoader?.loadModel(myUniqueID, id[i])
-        }, 1000)
+            i++
+
+            if (i != 99) {
+                loadModels(id)
+            }
+        }, 200)
 
 
-
-
-
-        }
     }
 
     private fun placeNode() {
 
         arFragment?.setOnTapArPlaneListener { hitResult: com.google.ar.core.HitResult?, plane: com.google.ar.core.Plane?, motionEvent: MotionEvent? ->
-            Log.d("olly", "map: $map")
+
             if (map["kw1"] == null) {
                 return@setOnTapArPlaneListener
             }
@@ -132,11 +131,17 @@ class ExampleActivity : AppCompatActivity() {
 
         btn_animate.setOnClickListener {
 
-            Handler().postDelayed({
-                anchorNode?.removeChild(firstKWFrame)
-                animateFrames()
-            }, delayTime)
+            if (i != 99) {
 
+                snackbar("Loading Models, Please Wait...")
+
+            } else {
+
+                Handler().postDelayed({
+                    anchorNode?.removeChild(firstKWFrame)
+                    animateFrames()
+                }, delayTime)
+            }
         }
     }
 
@@ -147,7 +152,7 @@ class ExampleActivity : AppCompatActivity() {
         animationFrame.setParent(anchorNode)
 
 
-        if (frameNumber == 70) {
+        if (frameNumber == 100) {
 
             frameNumber = 1
             animationFrame.renderable = map["kw1"]
@@ -182,4 +187,11 @@ class ExampleActivity : AppCompatActivity() {
     fun getMyUniqueId(): Int {
         return uniqueId++
     }
+
+    fun snackbar(
+        message: String
+    ) {
+        Snackbar.make(btn_animate, message, Snackbar.LENGTH_LONG).show()
+    }
+
 }
