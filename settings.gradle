@@ -1,1 +1,1 @@
-include ':app', ':rxnodeanimators'
+include ':app'
