@@ -22,6 +22,7 @@ class ModelLoader internal constructor(owner: ExampleActivity){
      * @return true if loading was initiated.
      */
     fun loadModel(id: Int, resourceId: Int) {
+
         val activity: ExampleActivity? = owner.get()
 
         if (activity == null) {
@@ -48,7 +49,7 @@ class ModelLoader internal constructor(owner: ExampleActivity){
 
     private fun onException(id: Int, throwable: Throwable): ModelRenderable? {
 
-        owner.get()?.onException(id, throwable)
+//        owner.get()?.onException(id, throwable)
         futureSet.remove(id)
         return null
     }
