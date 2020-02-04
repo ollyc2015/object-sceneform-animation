@@ -3,9 +3,7 @@ package com.lush_digital.objanimation
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import android.view.Gravity
 import android.view.MotionEvent
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import com.google.ar.core.Anchor
@@ -27,10 +25,15 @@ class ExampleActivity : AppCompatActivity() {
     val id = ArrayList<Int>()
     var anchorNode: AnchorNode? = null
     var firstKWFrame: SkeletonNode? = null
+    var animationFrame: SkeletonNode? = null
     val delayTime = 100L
     var frameNumber: Int = 1
     var uniqueId: Int = 1
     var modelLoaderCount = 0
+    var userResetAnimation = false
+    var pausedClicked = false
+    var pausedFrame = 0
+    var resumeAnimation = false
 
     private var modelLoader: ModelLoader? = null
 
@@ -42,17 +45,16 @@ class ExampleActivity : AppCompatActivity() {
         init()
     }
 
-    init {
-        getAllRawFiles()
-    }
 
     fun init() {
 
         arFragment = supportFragmentManager.findFragmentById(R.id.ux_fragment) as ArFragment?
 
+        getAllRawFiles()
         placeNode()
         animate()
-
+        restartAnimation()
+        pauseAnimation()
 
         modelLoader = ModelLoader(this)
 
@@ -84,7 +86,6 @@ class ExampleActivity : AppCompatActivity() {
     }
 
 
-
     private fun loadModels(id: ArrayList<Int>) {
 
         val handler = Handler()
@@ -97,7 +98,7 @@ class ExampleActivity : AppCompatActivity() {
             if (modelLoaderCount != 99) {
                 loadModels(id)
             }
-        }, 200)
+        }, 250)
 
 
     }
@@ -131,16 +132,30 @@ class ExampleActivity : AppCompatActivity() {
 
         btn_animate.setOnClickListener {
 
+            userResetAnimation = false
+
             if (modelLoaderCount != 99) {
 
                 snackbar("Loading Models $modelLoaderCount/100, Please Wait...")
 
             } else {
 
-                Handler().postDelayed({
-                    anchorNode?.removeChild(firstKWFrame)
-                    animateFrames()
-                }, delayTime)
+                btn_animate.hide()
+                btn_pause.show()
+
+                if (pausedClicked) {
+
+                    resumeAnimations()
+
+
+
+                } else {
+
+                    Handler().postDelayed({
+                        anchorNode?.removeChild(firstKWFrame)
+                        animateFrames()
+                    }, delayTime)
+                }
             }
         }
     }
@@ -148,25 +163,95 @@ class ExampleActivity : AppCompatActivity() {
 
     private fun animateFrames() {
 
-        val animationFrame = SkeletonNode()
-        animationFrame.setParent(anchorNode)
+        if (!pausedClicked) {
+
+            if (frameNumber == 100 && !userResetAnimation) {
+
+                animationFrame = SkeletonNode()
+                animationFrame?.setParent(anchorNode)
+
+                frameNumber = 1
+                animationFrame?.renderable = map["kw1"]
+
+            } else if (!userResetAnimation) {
+
+                animationFrame = SkeletonNode()
+                animationFrame?.setParent(anchorNode)
+
+                animationFrame?.renderable = map["kw$frameNumber"]
+
+            }
+
+            if (!userResetAnimation) {
 
 
-        if (frameNumber == 100) {
-
-            frameNumber = 1
-            animationFrame.renderable = map["kw1"]
-
-        } else {
-            animationFrame.renderable = map["kw$frameNumber"]
+                Handler().postDelayed({
+                    anchorNode?.removeChild(animationFrame)
+                    frameNumber++
+                    animateFrames()
+                }, delayTime)
+            }
         }
+    }
 
-        Handler().postDelayed({
+
+
+    fun restartAnimation() {
+
+        btn_restart.setOnClickListener {
+
+            userResetAnimation = true
+            frameNumber = 1
             anchorNode?.removeChild(animationFrame)
-            frameNumber++
-            animateFrames()
-        }, delayTime)
+            callFirstFrame()
 
+        }
+    }
+
+    fun pauseAnimation() {
+
+        btn_pause.setOnClickListener {
+
+            btn_pause.hide()
+            btn_animate.show()
+            pausedClicked = true
+            pausedFrame = frameNumber
+
+            animationFrame = SkeletonNode()
+            animationFrame?.setParent(anchorNode)
+            animationFrame?.renderable = map["kw$pausedFrame"]
+        }
+    }
+
+    fun resumeAnimations(){
+
+        if (!userResetAnimation) {
+
+            resumeAnimation = true
+            anchorNode?.removeChild(animationFrame)
+            resumeFromPausedFrame()
+
+        }
+    }
+
+    private fun resumeFromPausedFrame() {
+
+        if (!userResetAnimation && resumeAnimation) {
+
+            animationFrame = SkeletonNode()
+            animationFrame?.setParent(anchorNode)
+
+            animationFrame?.renderable = map["kw$pausedFrame"]
+
+        }
+        if (resumeAnimation) {
+
+            Handler().postDelayed({
+                anchorNode?.removeChild(animationFrame)
+                pausedFrame++
+                resumeFromPausedFrame()
+            }, delayTime)
+        }
     }
 
 
@@ -177,10 +262,8 @@ class ExampleActivity : AppCompatActivity() {
     }
 
     fun onException(id: Int, throwable: Throwable?) {
-        val toast =
-            Toast.makeText(this, "Unable to load renderable: $id", Toast.LENGTH_LONG)
-        toast.setGravity(Gravity.CENTER, 0, 0)
-        toast.show()
+
+        snackbar("Unable to load knot wrap renderable $id due to: $throwable")
         Log.e("Error", "Unable to load knot wrap renderable", throwable)
     }
 
