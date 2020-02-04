@@ -7,6 +7,9 @@ import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import com.google.ar.core.Anchor
+import com.google.ar.core.Config
+import com.google.ar.core.HitResult
+import com.google.ar.core.Plane
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.SkeletonNode
 import com.google.ar.sceneform.rendering.ModelRenderable
@@ -24,8 +27,9 @@ class ExampleActivity : AppCompatActivity() {
     var map: MutableMap<String, ModelRenderable?> = HashMap()
     val id = ArrayList<Int>()
     var anchorNode: AnchorNode? = null
-    var firstKWFrame: SkeletonNode? = null
-    var animationFrame: SkeletonNode? = null
+    var firstAnimationFrame: SkeletonNode? = null
+    var animationFrames: SkeletonNode? = null
+    var resumedAnimationFrame: SkeletonNode? = null
     val delayTime = 100L
     var frameNumber: Int = 1
     var uniqueId: Int = 1
@@ -34,6 +38,7 @@ class ExampleActivity : AppCompatActivity() {
     var pausedClicked = false
     var pausedFrame = 0
     var resumeAnimation = false
+    private var initialized = false
 
     private var modelLoader: ModelLoader? = null
 
@@ -41,15 +46,15 @@ class ExampleActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_example)
-
+        arFragment = ux_fragment as ArFragment?
         init()
-    }
+}
+
 
 
     fun init() {
 
-        arFragment = supportFragmentManager.findFragmentById(R.id.ux_fragment) as ArFragment?
-
+        frameListener()
         getAllRawFiles()
         placeNode()
         animate()
@@ -57,7 +62,22 @@ class ExampleActivity : AppCompatActivity() {
         pauseAnimation()
 
         modelLoader = ModelLoader(this)
+    }
 
+
+
+    private fun frameListener() {
+
+        // Add a frame update listener to the scene to decide when to show/hide plane detection.
+        arFragment?.arSceneView?.scene?.addOnUpdateListener {
+
+            if(!initialized) {
+                if (arFragment?.arSceneView?.session != null) {
+                    disablePlaneFinding()
+                    initialized = true
+                }
+            }
+        }
     }
 
 
@@ -105,7 +125,7 @@ class ExampleActivity : AppCompatActivity() {
 
     private fun placeNode() {
 
-        arFragment?.setOnTapArPlaneListener { hitResult: com.google.ar.core.HitResult?, plane: com.google.ar.core.Plane?, motionEvent: MotionEvent? ->
+        arFragment?.setOnTapArPlaneListener { hitResult: HitResult?, plane: Plane?, motionEvent: MotionEvent? ->
 
             if (map["kw1"] == null) {
                 return@setOnTapArPlaneListener
@@ -122,9 +142,9 @@ class ExampleActivity : AppCompatActivity() {
 
     private fun callFirstFrame() {
 
-        firstKWFrame = SkeletonNode()
-        firstKWFrame?.setParent(anchorNode)
-        firstKWFrame?.renderable = map["kw1"]
+        firstAnimationFrame = SkeletonNode()
+        firstAnimationFrame?.setParent(anchorNode)
+        firstAnimationFrame?.renderable = map["kw1"]
 
     }
 
@@ -140,21 +160,29 @@ class ExampleActivity : AppCompatActivity() {
 
             } else {
 
-                btn_animate.hide()
-                btn_pause.show()
+                enablePlaneFinding()
 
-                if (pausedClicked) {
-
-                    resumeAnimations()
+                if (anchorNode != null) {
 
 
+                    btn_animate.hide()
+                    btn_pause.show()
 
+                    if (pausedClicked) {
+
+                        Handler().postDelayed({
+                            resumeAnimations()
+                        }, delayTime)
+
+                    } else {
+
+                        Handler().postDelayed({
+                            anchorNode?.removeChild(firstAnimationFrame)
+                            animateFrames()
+                        }, delayTime)
+                    }
                 } else {
-
-                    Handler().postDelayed({
-                        anchorNode?.removeChild(firstKWFrame)
-                        animateFrames()
-                    }, delayTime)
+                    snackbar("Please Place Knot Wrap before Clicking Play")
                 }
             }
         }
@@ -163,30 +191,30 @@ class ExampleActivity : AppCompatActivity() {
 
     private fun animateFrames() {
 
+
         if (!pausedClicked) {
 
             if (frameNumber == 100 && !userResetAnimation) {
 
-                animationFrame = SkeletonNode()
-                animationFrame?.setParent(anchorNode)
+                animationFrames = SkeletonNode()
+                animationFrames?.setParent(anchorNode)
 
                 frameNumber = 1
-                animationFrame?.renderable = map["kw1"]
+                animationFrames?.renderable = map["kw1"]
 
             } else if (!userResetAnimation) {
 
-                animationFrame = SkeletonNode()
-                animationFrame?.setParent(anchorNode)
+                animationFrames = SkeletonNode()
+                animationFrames?.setParent(anchorNode)
 
-                animationFrame?.renderable = map["kw$frameNumber"]
+                animationFrames?.renderable = map["kw$frameNumber"]
 
             }
 
             if (!userResetAnimation) {
 
-
                 Handler().postDelayed({
-                    anchorNode?.removeChild(animationFrame)
+                    anchorNode?.removeChild(animationFrames)
                     frameNumber++
                     animateFrames()
                 }, delayTime)
@@ -194,15 +222,13 @@ class ExampleActivity : AppCompatActivity() {
         }
     }
 
-
-
     fun restartAnimation() {
 
         btn_restart.setOnClickListener {
 
             userResetAnimation = true
             frameNumber = 1
-            anchorNode?.removeChild(animationFrame)
+            anchorNode?.removeChild(animationFrames)
             callFirstFrame()
 
         }
@@ -217,41 +243,46 @@ class ExampleActivity : AppCompatActivity() {
             pausedClicked = true
             pausedFrame = frameNumber
 
-            animationFrame = SkeletonNode()
-            animationFrame?.setParent(anchorNode)
-            animationFrame?.renderable = map["kw$pausedFrame"]
+            resumedAnimationFrame = SkeletonNode()
+            resumedAnimationFrame?.setParent(anchorNode)
+            resumedAnimationFrame?.renderable = map["kw$pausedFrame"]
         }
     }
 
-    fun resumeAnimations(){
+    fun resumeAnimations() {
 
         if (!userResetAnimation) {
 
             resumeAnimation = true
-            anchorNode?.removeChild(animationFrame)
-            resumeFromPausedFrame()
+
+            Handler().postDelayed({
+                anchorNode?.removeChild(resumedAnimationFrame)
+                resumeFromPausedFrame()
+            }, delayTime)
 
         }
     }
 
     private fun resumeFromPausedFrame() {
 
+
         if (!userResetAnimation && resumeAnimation) {
 
-            animationFrame = SkeletonNode()
-            animationFrame?.setParent(anchorNode)
+            resumedAnimationFrame = SkeletonNode()
+            resumedAnimationFrame?.setParent(anchorNode)
 
-            animationFrame?.renderable = map["kw$pausedFrame"]
+            resumedAnimationFrame?.renderable = map["kw$pausedFrame"]
 
         }
         if (resumeAnimation) {
 
             Handler().postDelayed({
-                anchorNode?.removeChild(animationFrame)
+                anchorNode?.removeChild(resumedAnimationFrame)
                 pausedFrame++
                 resumeFromPausedFrame()
             }, delayTime)
         }
+
     }
 
 
@@ -277,4 +308,32 @@ class ExampleActivity : AppCompatActivity() {
         Snackbar.make(btn_animate, message, Snackbar.LENGTH_LONG).show()
     }
 
+    fun disablePlaneFinding() {
+
+        if (arFragment?.arSceneView?.session != null) {
+
+            arFragment?.planeDiscoveryController?.hide()
+            arFragment?.planeDiscoveryController?.setInstructionView(null)
+            arFragment?.arSceneView?.planeRenderer?.isEnabled = false
+
+
+            val config = Config(arFragment?.arSceneView?.session)
+            config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+            config.planeFindingMode = Config.PlaneFindingMode.DISABLED
+            arFragment?.arSceneView?.session?.configure(config)
+        }
+    }
+
+
+    fun enablePlaneFinding() {
+        if (arFragment?.arSceneView?.session != null) {
+
+            arFragment?.planeDiscoveryController?.show()
+            val config = Config(arFragment?.arSceneView?.session)
+            config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+            config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL_AND_VERTICAL
+            arFragment?.arSceneView?.session?.configure(config)
+            arFragment?.arSceneView?.planeRenderer?.isEnabled = true
+        }
+    }
 }
