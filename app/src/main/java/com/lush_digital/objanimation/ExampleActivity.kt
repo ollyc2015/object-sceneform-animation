@@ -27,12 +27,10 @@ class ExampleActivity : AppCompatActivity() {
     val id = ArrayList<Int>()
     var anchorNode: AnchorNode? = null
     var firstKWFrame: SkeletonNode? = null
-    //var animationFrame: SkeletonNode? = null
     val delayTime = 100L
     var frameNumber: Int = 1
     var uniqueId: Int = 1
-
-    var i = 0
+    var modelLoaderCount = 0
 
     private var modelLoader: ModelLoader? = null
 
@@ -81,8 +79,10 @@ class ExampleActivity : AppCompatActivity() {
             id.add(resources.getIdentifier("kw$i", "raw", packageName))
 
         }
+
         return id
     }
+
 
 
     private fun loadModels(id: ArrayList<Int>) {
@@ -91,10 +91,10 @@ class ExampleActivity : AppCompatActivity() {
         handler.postDelayed({
 
             val myUniqueID = getMyUniqueId()
-            modelLoader?.loadModel(myUniqueID, id[i])
-            i++
+            modelLoader?.loadModel(myUniqueID, id[modelLoaderCount])
+            modelLoaderCount++
 
-            if (i != 99) {
+            if (modelLoaderCount != 99) {
                 loadModels(id)
             }
         }, 200)
@@ -131,9 +131,9 @@ class ExampleActivity : AppCompatActivity() {
 
         btn_animate.setOnClickListener {
 
-            if (i != 99) {
+            if (modelLoaderCount != 99) {
 
-                snackbar("Loading Models, Please Wait...")
+                snackbar("Loading Models $modelLoaderCount/100, Please Wait...")
 
             } else {
 
@@ -181,7 +181,7 @@ class ExampleActivity : AppCompatActivity() {
             Toast.makeText(this, "Unable to load renderable: $id", Toast.LENGTH_LONG)
         toast.setGravity(Gravity.CENTER, 0, 0)
         toast.show()
-        Log.e("Error", "Unable to load andy renderable", throwable)
+        Log.e("Error", "Unable to load knot wrap renderable", throwable)
     }
 
     fun getMyUniqueId(): Int {
