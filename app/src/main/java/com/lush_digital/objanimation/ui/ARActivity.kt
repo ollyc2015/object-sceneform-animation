@@ -1,11 +1,13 @@
 package com.lush_digital.objanimation.ui
 
 import android.os.Bundle
-import android.os.Handler
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.google.ar.core.Config
 import com.google.ar.sceneform.ux.ArFragment
 import com.lush_digital.objanimation.R
+import com.lush_digital.objanimation.ui.viewmodel.LoadingViewModel
 import kotlinx.android.synthetic.main.activity_ar.*
 
 
@@ -15,11 +17,10 @@ class ARActivity : AppCompatActivity() {
     private var initialized = false
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ar)
-       // arFragment = ux_fragment as ArFragment?
+        arFragment = ux_fragment as ArFragment?
         init()
     }
 
@@ -38,6 +39,7 @@ class ARActivity : AppCompatActivity() {
             if (!initialized) {
                 if (arFragment?.arSceneView?.session != null) {
                     disablePlaneFinding()
+                    Log.d("olly", "${LoadingViewModel.getMap()}")
                     initialized = true
                 }
             }
@@ -53,7 +55,6 @@ class ARActivity : AppCompatActivity() {
             arFragment?.planeDiscoveryController?.setInstructionView(null)
             arFragment?.arSceneView?.planeRenderer?.isEnabled = false
 
-
             val config = Config(arFragment?.arSceneView?.session)
             config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
             config.planeFindingMode = Config.PlaneFindingMode.DISABLED
@@ -61,5 +62,15 @@ class ARActivity : AppCompatActivity() {
         }
     }
 
+
+/*
+    private fun observeViewModel(viewModel:LoadingViewModel) {
+        viewModel.myMap.observe(this, Observer {
+
+
+        })
+    }
+
+ */
 
 }

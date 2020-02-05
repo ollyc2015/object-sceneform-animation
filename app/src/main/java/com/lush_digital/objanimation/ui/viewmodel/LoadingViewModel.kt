@@ -1,0 +1,105 @@
+package com.lush_digital.objanimation.ui.viewmodel
+
+import android.app.Application
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import com.google.ar.sceneform.rendering.ModelRenderable
+import com.lush_digital.objanimation.data.ModelLoader
+
+
+class LoadingViewModel(application: Application) : AndroidViewModel(application) {
+
+
+    private var modelLoader: ModelLoader? = null
+    var numOfModelsLoadedTotal = 0
+    val batchSize = 25
+    var map: MutableLiveData<HashMap<String, ModelRenderable?>> =  MutableLiveData()
+    val id = ArrayList<Int>()
+
+    private var modelIDCount: MutableLiveData<Int>? = null
+
+
+
+    fun getModelIDCount(): MutableLiveData<Int>? {
+        if (modelIDCount == null) {
+            modelIDCount = MutableLiveData()
+
+        }
+        return modelIDCount
+    }
+
+    fun loadRawFiles(){
+
+        allRawFiles()
+        loadBatchModels()
+    }
+
+    fun loadModel() {
+        modelLoader = ModelLoader(this)
+    }
+
+    private fun allRawFiles(): ArrayList<Int> {
+        for (i in 1..100) {
+            id.add(getApplication<Application>().resources.getIdentifier("kw$i", "raw", getApplication<Application>().packageName))
+        }
+        return id
+    }
+
+
+    private fun loadBatchModels() {
+        val tempLoaded = numOfModelsLoadedTotal
+        for (i in tempLoaded until tempLoaded + batchSize) {
+            if (i < 100) {
+                modelLoader?.loadModel(i, id[i])
+            }
+        }
+    }
+
+    fun setRenderable(id: Int, renderable: ModelRenderable) {
+        numOfModelsLoadedTotal++
+        map.value?.set("kw$id", renderable)
+
+        modelIDCount?.value = id
+
+
+        if (numOfModelsLoadedTotal == 100) {
+
+           // AndroidUtils.animateView(progress_overlay, View.GONE, 0f, 200)
+            Log.d("olly", "got to 100")
+
+            try {
+
+                // viewModel.setModels(map)
+                saveMap(map)
+
+
+            } catch (e: java.lang.Exception) {
+
+                Log.d("olly", "Error Here: $e")
+            }
+
+
+        }
+        if (numOfModelsLoadedTotal % batchSize == 0) {
+            loadBatchModels()
+        }
+    }
+
+    companion object{
+
+        var myMap: MutableLiveData<HashMap<String, ModelRenderable?>> =  MutableLiveData()
+
+        fun saveMap(map: MutableLiveData<HashMap<String, ModelRenderable?>>) {
+
+            myMap = map
+        }
+
+
+        fun getMap(): MutableLiveData<HashMap<String, ModelRenderable?>> {
+
+            return myMap
+        }
+
+    }
+}

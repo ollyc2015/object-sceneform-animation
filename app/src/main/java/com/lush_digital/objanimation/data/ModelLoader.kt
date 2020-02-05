@@ -3,13 +3,13 @@ package com.lush_digital.objanimation.data
 import android.util.Log
 import android.util.SparseArray
 import com.google.ar.sceneform.rendering.ModelRenderable
-import com.lush_digital.objanimation.ui.MainActivity
+import com.lush_digital.objanimation.ui.viewmodel.LoadingViewModel
 import java.lang.ref.WeakReference
 import java.util.concurrent.CompletableFuture
 
-class ModelLoader internal constructor(owner: MainActivity){
+class ModelLoader internal constructor(owner: LoadingViewModel){
     private val futureSet = SparseArray<CompletableFuture<ModelRenderable>>()
-    private val owner: WeakReference<MainActivity> = WeakReference(owner)
+    private val owner: WeakReference<LoadingViewModel> = WeakReference(owner)
     /**
      * Starts loading the model specified. The result of the loading is returned asynchrounously via
      * {@link ARPresenter#setRenderable(int, ModelRenderable)} or {@link
@@ -24,7 +24,7 @@ class ModelLoader internal constructor(owner: MainActivity){
      */
     fun loadModel(id: Int, resourceId: Int) {
 
-        val activity: MainActivity? = owner.get()
+        val activity: LoadingViewModel? = owner.get()
 
         if (activity == null) {
             Log.d("Error", "Activity is null.  Cannot load model.")
@@ -32,7 +32,7 @@ class ModelLoader internal constructor(owner: MainActivity){
         }
         val future =
             ModelRenderable.builder()
-                .setSource(owner.get(), resourceId)
+                .setSource(owner.get()?.getApplication(), resourceId)
                 .build()
                 .thenApply { renderable: ModelRenderable ->
                     setRenderable(id, renderable)

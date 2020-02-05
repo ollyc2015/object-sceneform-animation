@@ -7,7 +7,7 @@
     android:animateLayoutChanges="true"
     android:background="@android:color/black"
     android:clickable="true"
-    android:visibility="gone"
+    android:visibility="visible"
     android:focusable="true">
 
     <ProgressBar
@@ -17,5 +17,18 @@
         android:layout_gravity="center"
         android:indeterminate="true"
         android:indeterminateTint="@color/design_default_color_background" />
+
+    <TextView
+        android:id="@+id/theTextView"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/design_default_color_background"
+        android:text="0%"
+        android:textColor="@color/colorAccent" />
+
 
 </FrameLayout>
