@@ -14,7 +14,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
     private var modelLoader: ModelLoader? = null
     var numOfModelsLoadedTotal = 0
     val batchSize = 25
-    var map: MutableLiveData<HashMap<String, ModelRenderable?>> =  MutableLiveData()
+    var map: HashMap<String, ModelRenderable?> =  HashMap()
     val id = ArrayList<Int>()
 
     private var modelIDCount: MutableLiveData<Int>? = null
@@ -58,7 +58,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
 
     fun setRenderable(id: Int, renderable: ModelRenderable) {
         numOfModelsLoadedTotal++
-        map.value?.set("kw$id", renderable)
+        map.set("kw$id", renderable)
 
         modelIDCount?.value = id
 
@@ -88,15 +88,15 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
 
     companion object{
 
-        var myMap: MutableLiveData<HashMap<String, ModelRenderable?>> =  MutableLiveData()
+        var myMap: HashMap<String, ModelRenderable?> =  HashMap()
 
-        fun saveMap(map: MutableLiveData<HashMap<String, ModelRenderable?>>) {
+        fun saveMap(map: HashMap<String, ModelRenderable?>) {
 
             myMap = map
         }
 
 
-        fun getMap(): MutableLiveData<HashMap<String, ModelRenderable?>> {
+        fun getMap(): HashMap<String, ModelRenderable?> {
 
             return myMap
         }

@@ -28,7 +28,7 @@ class ARActivity : AppCompatActivity() {
     private fun init() {
 
         frameListener()
-
+        Log.d("olly", "${LoadingViewModel.getMap()}")
     }
 
     private fun frameListener() {
@@ -39,7 +39,6 @@ class ARActivity : AppCompatActivity() {
             if (!initialized) {
                 if (arFragment?.arSceneView?.session != null) {
                     disablePlaneFinding()
-                    Log.d("olly", "${LoadingViewModel.getMap()}")
                     initialized = true
                 }
             }
