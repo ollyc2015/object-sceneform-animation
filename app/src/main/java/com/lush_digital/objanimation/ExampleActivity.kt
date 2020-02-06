@@ -1,9 +1,11 @@
 package com.lush_digital.objanimation
 
+
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import com.google.ar.core.Anchor
@@ -14,11 +16,9 @@ import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.SkeletonNode
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.ArFragment
+import com.lush_digital.objanimation.utils.AndroidUtils
 import kotlinx.android.synthetic.main.activity_example.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.android.synthetic.main.include_progress_overlay.*
 
 
 class ExampleActivity : AppCompatActivity() {
@@ -32,13 +32,14 @@ class ExampleActivity : AppCompatActivity() {
     var resumedAnimationFrame: SkeletonNode? = null
     val delayTime = 100L
     var frameNumber: Int = 1
-    var uniqueId: Int = 1
-    var modelLoaderCount = 0
     var userResetAnimation = false
     var pausedClicked = false
     var pausedFrame = 0
     var resumeAnimation = false
     private var initialized = false
+    var numOfModelsLoadedTotal = 0
+    val batchSize = 4
+
 
     private var modelLoader: ModelLoader? = null
 
@@ -46,24 +47,26 @@ class ExampleActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_example)
-        arFragment = ux_fragment as ArFragment?
-        init()
-}
 
+        init()
+    }
 
 
     fun init() {
 
+        arFragment = ux_fragment as ArFragment?
         frameListener()
-        getAllRawFiles()
+
+    }
+
+    fun initARFunctions() {
+
+
         placeNode()
         animate()
         restartAnimation()
         pauseAnimation()
-
-        modelLoader = ModelLoader(this)
     }
-
 
 
     private fun frameListener() {
@@ -71,9 +74,18 @@ class ExampleActivity : AppCompatActivity() {
         // Add a frame update listener to the scene to decide when to show/hide plane detection.
         arFragment?.arSceneView?.scene?.addOnUpdateListener {
 
-            if(!initialized) {
+            if (!initialized) {
                 if (arFragment?.arSceneView?.session != null) {
+
+                    Log.d("olly", "gets here")
                     disablePlaneFinding()
+
+                    val progressOverlay = progress_overlay
+                    AndroidUtils.animateView(progressOverlay, View.VISIBLE, 0.4f, 0)
+
+                    modelLoader = ModelLoader(this)
+                    allRawFiles()
+                    loadBatchModels()
                     initialized = true
                 }
             }
@@ -81,46 +93,22 @@ class ExampleActivity : AppCompatActivity() {
     }
 
 
-    private fun getAllRawFiles() {
-
-        GlobalScope.launch(Dispatchers.Main) {
-
-            val rawFiles = withContext(Dispatchers.IO) {
-                allRawFiles()
-            }
-
-            loadModels(rawFiles)
-
-        }
-    }
-
     private fun allRawFiles(): ArrayList<Int> {
-
-        for (i in 1 until 100) {
-
+        for (i in 1..100) {
             id.add(resources.getIdentifier("kw$i", "raw", packageName))
-
         }
-
         return id
     }
 
 
-    private fun loadModels(id: ArrayList<Int>) {
-
-        val handler = Handler()
-        handler.postDelayed({
-
-            val myUniqueID = getMyUniqueId()
-            modelLoader?.loadModel(myUniqueID, id[modelLoaderCount])
-            modelLoaderCount++
-
-            if (modelLoaderCount != 99) {
-                loadModels(id)
+    private fun loadBatchModels() {
+        val tempLoaded = numOfModelsLoadedTotal
+        for (i in tempLoaded until tempLoaded + batchSize) {
+            if (i < 100) {
+                Log.d("olly", "${i} ${id[i]}")
+                modelLoader?.loadModel(i, id[i])
             }
-        }, 250)
-
-
+        }
     }
 
     private fun placeNode() {
@@ -154,38 +142,32 @@ class ExampleActivity : AppCompatActivity() {
 
             userResetAnimation = false
 
-            if (modelLoaderCount != 99) {
+            enablePlaneFinding()
 
-                snackbar("Loading Models $modelLoaderCount/100, Please Wait...")
-
-            } else {
-
-                enablePlaneFinding()
-
-                if (anchorNode != null) {
+            if (anchorNode != null) {
 
 
-                    btn_animate.hide()
-                    btn_pause.show()
+                btn_animate.hide()
+                btn_pause.show()
 
-                    if (pausedClicked) {
+                if (pausedClicked) {
 
-                        Handler().postDelayed({
-                            resumeAnimations()
-                        }, delayTime)
+                    Handler().postDelayed({
+                        resumeAnimations()
+                    }, delayTime)
 
-                    } else {
-
-                        Handler().postDelayed({
-                            anchorNode?.removeChild(firstAnimationFrame)
-                            animateFrames()
-                        }, delayTime)
-                    }
                 } else {
-                    snackbar("Please Place Knot Wrap before Clicking Play")
+
+                    Handler().postDelayed({
+                        anchorNode?.removeChild(firstAnimationFrame)
+                        animateFrames()
+                    }, delayTime)
                 }
+            } else {
+                snackbar("Please Place Knot Wrap before Clicking Play")
             }
         }
+
     }
 
 
@@ -210,7 +192,6 @@ class ExampleActivity : AppCompatActivity() {
                 animationFrames?.renderable = map["kw$frameNumber"]
 
             }
-
             if (!userResetAnimation) {
 
                 Handler().postDelayed({
@@ -234,13 +215,14 @@ class ExampleActivity : AppCompatActivity() {
         }
     }
 
-    fun pauseAnimation() {
+    private fun pauseAnimation() {
 
         btn_pause.setOnClickListener {
 
             btn_pause.hide()
             btn_animate.show()
             pausedClicked = true
+            resumeAnimation = false
             pausedFrame = frameNumber
 
             resumedAnimationFrame = SkeletonNode()
@@ -253,10 +235,9 @@ class ExampleActivity : AppCompatActivity() {
 
         if (!userResetAnimation) {
 
-            resumeAnimation = true
-
             Handler().postDelayed({
                 anchorNode?.removeChild(resumedAnimationFrame)
+                resumeAnimation = true
                 resumeFromPausedFrame()
             }, delayTime)
 
@@ -265,8 +246,15 @@ class ExampleActivity : AppCompatActivity() {
 
     private fun resumeFromPausedFrame() {
 
+        if (pausedFrame == 100 && !userResetAnimation && resumeAnimation) {
 
-        if (!userResetAnimation && resumeAnimation) {
+            resumedAnimationFrame = SkeletonNode()
+            resumedAnimationFrame?.setParent(anchorNode)
+
+            pausedFrame = 1
+            resumedAnimationFrame?.renderable = map["kw1"]
+
+        } else if (!userResetAnimation && resumeAnimation) {
 
             resumedAnimationFrame = SkeletonNode()
             resumedAnimationFrame?.setParent(anchorNode)
@@ -287,8 +275,20 @@ class ExampleActivity : AppCompatActivity() {
 
 
     fun setRenderable(id: Int, renderable: ModelRenderable) {
-
+        numOfModelsLoadedTotal++
         map.set("kw$id", renderable)
+
+        theTextView.text = "$id"
+
+        if (numOfModelsLoadedTotal == 100) {
+
+            AndroidUtils.animateView(progress_overlay, View.GONE, 0f, 200)
+            initARFunctions()
+        }
+
+        if (numOfModelsLoadedTotal % batchSize == 0) {
+            loadBatchModels()
+        }
 
     }
 
@@ -298,9 +298,6 @@ class ExampleActivity : AppCompatActivity() {
         Log.e("Error", "Unable to load knot wrap renderable", throwable)
     }
 
-    fun getMyUniqueId(): Int {
-        return uniqueId++
-    }
 
     fun snackbar(
         message: String
@@ -308,7 +305,7 @@ class ExampleActivity : AppCompatActivity() {
         Snackbar.make(btn_animate, message, Snackbar.LENGTH_LONG).show()
     }
 
-    fun disablePlaneFinding() {
+    private fun disablePlaneFinding() {
 
         if (arFragment?.arSceneView?.session != null) {
 
@@ -325,7 +322,7 @@ class ExampleActivity : AppCompatActivity() {
     }
 
 
-    fun enablePlaneFinding() {
+    private fun enablePlaneFinding() {
         if (arFragment?.arSceneView?.session != null) {
 
             arFragment?.planeDiscoveryController?.show()
