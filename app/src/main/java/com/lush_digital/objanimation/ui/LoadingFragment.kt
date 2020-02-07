@@ -51,7 +51,7 @@ class LoadingFragment : Fragment() {
 
             theTextView.text = "$it"
 
-            if (it > 90) {
+            if (it == 50) {
 
                 AndroidUtils.animateView(progress_overlay, View.GONE, 0f, 200)
 

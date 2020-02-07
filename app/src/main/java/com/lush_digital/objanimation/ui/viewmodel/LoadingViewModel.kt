@@ -40,7 +40,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun allRawFiles(): ArrayList<Int> {
-        for (i in 1..100) {
+        for (i in 1..50) {
             id.add(getApplication<Application>().resources.getIdentifier("kw$i", "raw", getApplication<Application>().packageName))
         }
         return id
@@ -49,9 +49,9 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
 
     private fun loadBatchModels() {
         val tempLoaded = numOfModelsLoadedTotal
-        for (i in tempLoaded until tempLoaded + batchSize) {
-            if (i < 100) {
-                modelLoader?.loadModel(i, id[i])
+        for (i in tempLoaded .. tempLoaded + batchSize) {
+            if (i < 50) {
+                modelLoader?.loadModel(i+1, id[i])
             }
         }
     }
@@ -62,8 +62,10 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
 
         modelIDCount?.value = id
 
+        Log.d("olly", "my id: $id")
 
-        if (numOfModelsLoadedTotal == 100) {
+
+        if (numOfModelsLoadedTotal == 50) {
 
            // AndroidUtils.animateView(progress_overlay, View.GONE, 0f, 200)
             Log.d("olly", "got to 100")
