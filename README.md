@@ -1,4 +1,4 @@
-# object-sceneform-animation
+# Native Android AR Core Sceneform - .obj Animation
 Test Augmented Reality (AR) Project to try and animate in native Android using ARCore with .obj files only. 
 
 # Motivation
